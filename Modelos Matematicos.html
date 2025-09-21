@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulación de Llegadas y Servicios</title>
+  <link rel="stylesheet" href="stylo.css">
+</head>
+<body>
+
+  <h1>Simulación de Clientes</h1>
+
+  <div class="panel">
+    <h2>Clientes: <span id="contadorClientes">0</span></h2>
+    <button onclick="llegadaCliente()">Llegada de Cliente</button>
+    <button onclick="finServicio()">Fin de Servicio</button>
+  </div>
+
+  <button class="btn-exportar" onclick="generarTXT()">Generar archivo TXT</button>
+
+  <div class="table-container">
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Hora de llegada</th>
+          <th>Tiempo interarribo (min)</th>
+          <th>Hora de salida</th>
+          <th>Tiempo de servicio (min)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    let contadorClientes = 0;
+    let registros = [];
+    let horaUltimaLlegada = null;
+
+    function llegadaCliente() {
+      contadorClientes++;
+      document.getElementById("contadorClientes").textContent = contadorClientes;
+
+      const ahora = new Date();
+      const horaTexto = ahora.toLocaleTimeString([], {hour: "2-digit", minute:"2-digit", second:"2-digit"});
+      const tiempoMs = ahora.getTime();
+
+      let interarribo = "–";
+      if (horaUltimaLlegada) {
+        interarribo = ((tiempoMs - horaUltimaLlegada) / 60000).toFixed(1) + " min";
+      }
+      horaUltimaLlegada = tiempoMs;
+
+      registros.push({
+        cliente: contadorClientes,
+        llegada: horaTexto,
+        llegadaMs: tiempoMs,
+        interarribo: interarribo,
+        salida: "",
+        salidaMs: null,
+        servicio: ""
+      });
+
+      actualizarTabla();
+    }
+
+    function finServicio() {
+      const clientePendiente = registros.find(r => r.salida === "");
+      if (!clientePendiente) {
+        alert("No hay clientes en espera o en servicio.");
+        return;
+      }
+
+      const ahora = new Date();
+      const horaTexto = ahora.toLocaleTimeString([], {hour: "2-digit", minute:"2-digit", second:"2-digit"});
+      const tiempoMs = ahora.getTime();
+
+      clientePendiente.salida = horaTexto;
+      clientePendiente.salidaMs = tiempoMs;
+      clientePendiente.servicio = ((tiempoMs - clientePendiente.llegadaMs) / 60000).toFixed(1);
+
+      actualizarTabla();
+    }
+
+    function actualizarTabla() {
+      const tbody = document.querySelector("#tabla tbody");
+      tbody.innerHTML = "";
+      registros.forEach(r => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${r.cliente}</td>
+          <td>${r.llegada}</td>
+          <td>${r.interarribo}</td>
+          <td>${r.salida}</td>
+          <td>${r.servicio}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    function generarTXT() {
+      let texto = "Cliente | Hora de llegada | Tiempo interarribo (min) | Hora de salida | Tiempo de servicio (min)\n";
+      registros.forEach(r => {
+        texto += `${r.cliente} | ${r.llegada} | ${r.interarribo} | ${r.salida} | ${r.servicio}\n`;
+      });
+
+      const blob = new Blob([texto], { type: "text/plain" });
+      const enlace = document.createElement("a");
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = "clientes.txt";
+      enlace.click();
+    }
+  </script>
+
+</body>
+</html>
