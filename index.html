@@ -23,9 +23,9 @@
         <tr>
           <th>Cliente</th>
           <th>Hora de llegada</th>
-          <th>Tiempo interarribo (min)</th>
+          <th>Tiempo interarribo (seg)</th>
           <th>Hora de salida</th>
-          <th>Tiempo de servicio (min)</th>
+          <th>Tiempo de servicio (seg)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -47,7 +47,7 @@
 
       let interarribo = "–";
       if (horaUltimaLlegada) {
-        interarribo = ((tiempoMs - horaUltimaLlegada) / 60000).toFixed(1) + " min";
+        interarribo = ((tiempoMs - horaUltimaLlegada) / 1000).toFixed(1) + " seg";
       }
       horaUltimaLlegada = tiempoMs;
 
@@ -77,7 +77,7 @@
 
       clientePendiente.salida = horaTexto;
       clientePendiente.salidaMs = tiempoMs;
-      clientePendiente.servicio = ((tiempoMs - clientePendiente.llegadaMs) / 60000).toFixed(1);
+      clientePendiente.servicio = ((tiempoMs - clientePendiente.llegadaMs) / 1000).toFixed(1);
 
       actualizarTabla();
     }
@@ -99,7 +99,7 @@
     }
 
     function generarTXT() {
-      let texto = "Cliente | Hora de llegada | Tiempo interarribo (min) | Hora de salida | Tiempo de servicio (min)\n";
+      let texto = "Cliente | Hora de llegada | Tiempo interarribo (seg) | Hora de salida | Tiempo de servicio (seg)\n";
       registros.forEach(r => {
         texto += `${r.cliente} | ${r.llegada} | ${r.interarribo} | ${r.salida} | ${r.servicio}\n`;
       });
